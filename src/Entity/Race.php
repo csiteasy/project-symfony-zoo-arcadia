@@ -19,7 +19,7 @@ class Race
     use DateTrait;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['default'])]
+    #[Groups(['default','api_list_lite','api_view_animal'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 50)]

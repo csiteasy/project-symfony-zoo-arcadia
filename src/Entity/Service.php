@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
 use App\Entity\Traits\DateTrait;
 use App\Entity\Traits\UuidTrait;
 use App\Repository\ServiceRepository;
@@ -12,20 +14,28 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ServiceRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+
+#[ApiResource(
+    operations: [
+        new GetCollection(
+            normalizationContext: ['groups' => ['api_list_services']]
+        )
+        ]
+)]
 class Service
 {
     use UuidTrait;
     use DateTrait;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['default'])]
+    #[Groups(['default','api_list_services'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 120, nullable: true)]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['default'])]
+    #[Groups(['default','api_list_services'])]
     private ?string $description = null;
 
 

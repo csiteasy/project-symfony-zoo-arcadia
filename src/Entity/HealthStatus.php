@@ -21,11 +21,11 @@ class HealthStatus
     use DateTrait;
 
     #[ORM\Column(length: 60)]
-    #[Groups(['default'])]
+    #[Groups(['default','api_view_animal'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['default'])]
+    #[Groups(['default','api_view_animal'])]
     private ?string $description = null;
 
     /**

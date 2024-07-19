@@ -92,6 +92,11 @@ abstract class Image
             if ($postfix) $postfix='-'.$postfix;
             return $this->filename.$postfix.'.'.$this->extension;
     }
+    #[Groups(['api_list_lite','api_view_animal'])]
+    public function getFullUrl($postfix = ''): ?string{
+
+        return '/images/'.$this->getEntityType().'/'.$this->getFilenameWithExtension($postfix);
+    }
 
 
 

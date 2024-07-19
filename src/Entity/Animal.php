@@ -3,7 +3,11 @@
 namespace App\Entity;
 
 use AllowDynamicProperties;
-
+use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use App\Entity\Race;
 use App\Entity\Traits\DateTrait;
 use App\Entity\Traits\UuidTrait;
@@ -11,6 +15,7 @@ use App\Repository\AnimalRepository;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -18,36 +23,63 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[AllowDynamicProperties] #[ORM\Entity(repositoryClass: AnimalRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity('name', message: 'Ce nom est déjà utilisé. Veuillez en choisir un autre.')]
+
+#[ApiResource(
+    operations: [
+        new GetCollection(
+            normalizationContext: ['groups' => ['api_list_lite']]
+        ),
+        new Get(
+
+            normalizationContext: ['groups' => ['api_view_animal']],
+
+        )
+    ]
+
+)]
+/*#[ApiResource(
+    uriTemplate: '/animals/{habitatSlug}',
+    operations: [new GetCollection()],
+    uriVariables: [
+        'habitatSlug' => new Link(fromProperty: 'animals', fromClass: Habitat::class, identifiers: ['slug'])
+    ],
+    normalizationContext: ['groups' => ['api_list_lite']]
+)]*/
 class Animal
 {
     use UuidTrait;
     use DateTrait;
 
     #[ORM\Column(length: 100, unique: true)]
-    #[Groups(['default'])]
+    #[Groups(['default','api_list_lite','api_view_animal'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 120, nullable: true)]
+    #[Groups(['api_list_lite'])]
+    #[ApiProperty(identifier: true)]
     private ?string $slug = null;
 
 
     #[ORM\ManyToOne(inversedBy: 'animals')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['api_list_lite','api_view_animal'])]
     private ?race $race = null;
 
     #[ORM\ManyToOne(inversedBy: 'animals')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['api_view_animal'])]
     private ?Habitat $habitat = null;
 
 
     #[ORM\OneToMany(mappedBy: 'animal', targetEntity: AnimalImage::class, fetch: 'EAGER', cascade: ['persist', 'remove'])]
-    #[Groups(['default'])]
+    #[Groups(['default','api_list_lite','api_view_animal'])]
     private Collection $images;
 
     /**
      * @var Collection<int, MedicalReport>
      */
     #[ORM\OneToMany(targetEntity: MedicalReport::class, mappedBy: 'animal')]
+    /*#[Groups(['api_view_animal'])]*/
     private Collection $medicalReports;
 
 
@@ -150,6 +182,15 @@ class Animal
         return $this;
     }
 
+    // API PLATFORM
+    #[Groups(['api_view_animal'])]
+    public function getLastMedicalReport(): ?MedicalReport
+    {
+        return $this->medicalReports->matching(Criteria::create()
+            ->orderBy(['createdAt' => 'DESC'])
+            ->setMaxResults(1)
+        )->first() ?: null;
+    }
 
 
 

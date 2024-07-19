@@ -17,7 +17,7 @@ class MedicalReport
     use DateTrait;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['default'])]
+    #[Groups(['default','api_view_animal'])]
     private ?string $review = null;
 
     #[ORM\Column]
@@ -36,7 +36,7 @@ class MedicalReport
 
     #[ORM\ManyToOne(inversedBy: 'medicalReports')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['default'])]
+    #[Groups(['default','api_view_animal'])]
     private ?HealthStatus $healthStatus = null;
 
 

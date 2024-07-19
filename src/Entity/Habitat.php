@@ -5,6 +5,10 @@ namespace App\Entity;
 
 
 
+use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Entity\Traits\DateTrait;
 use App\Entity\Traits\UuidTrait;
 use App\Repository\HabitatRepository;
@@ -20,20 +24,35 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: HabitatRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+#[ApiResource(
+    operations: [
+        new GetCollection(
+            normalizationContext: ['groups' => ['api_list_lite']]
+        ),
+        new Get(
+
+            normalizationContext: ['groups' => ['api_list_lite','api_view']],
+
+        )
+    ]
+
+)]
 class Habitat
 {
     use UuidTrait;
     use DateTrait;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['default'])]
+    #[Groups(['default','api_list_lite','api_view_animal'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 120, nullable: true)]
+    #[Groups(['api_list_lite'])]
+    #[ApiProperty(identifier: true)]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['default'])]
+    #[Groups(['default','api_view'])]
     private ?string $description = null;
 
     #[ORM\Column(type: Types::INTEGER, nullable: false,options: ['default' => 0])]
@@ -41,7 +60,7 @@ class Habitat
     private ?int $counterAnimal  = 0;
 
     #[ORM\OneToMany(targetEntity: HabitatImage::class, mappedBy: 'habitat', cascade: ['persist', 'remove'], fetch: 'EAGER')]
-    #[Groups(['default'])]
+    #[Groups(['default','api_list_lite'])]
     private Collection $images;
 
 
@@ -50,6 +69,7 @@ class Habitat
      * @var Collection<int, animal>
      */
     #[ORM\OneToMany(targetEntity: Animal::class, mappedBy: 'habitat')]
+    #[Groups(['default','api_view'])]
     private Collection $animals;
 
     public function __construct()
@@ -161,6 +181,5 @@ class Habitat
             $this->counterAnimal--;
         }
     }
-
 
 }

@@ -2,30 +2,49 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
 use App\Entity\Traits\DateTrait;
 use App\Entity\Traits\UuidTrait;
 use App\Repository\ReviewRepository;
-use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Ramsey\Uuid\Doctrine\UuidGenerator;
-use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 
 #[ORM\Entity(repositoryClass: ReviewRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+
+#[ApiResource(
+    operations: [
+        new GetCollection(
+            paginationEnabled: true,
+            paginationItemsPerPage: 6,
+            order: ['publishedAt' => 'DESC'], // Nombre de résultats par page
+            normalizationContext: ['groups' => ['api_list_review']] // Tri par date de publication
+        ),
+        new Post(
+            normalizationContext: ['groups' => ['api_create_review']],
+            denormalizationContext: ['groups' => ['api_create_review']]
+        )
+
+    ]
+
+)]
+
 class Review
 {
     use UuidTrait;
     use DateTrait;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['default'])]
+    #[Groups(['default','api_list_review','api_create_review'])]
     private ?string $pseudo = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['default'])]
+    #[Groups(['default','api_list_review','api_create_review'])]
     private ?string $content = null;
 
     #[ORM\Column]
@@ -33,11 +52,8 @@ class Review
     private ?bool $published = false;
 
     #[ORM\Column(type: 'datetime_immutable',nullable: true)]
-    #[Groups(['default'])]
+    #[Groups(['default','api_list_review'])]
     private ?\DateTimeImmutable $publishedAt = null;
-
-
-
 
 
     public function getPseudo(): ?string
@@ -87,4 +103,6 @@ class Review
         return $this;
     }
 
+
+    
 }

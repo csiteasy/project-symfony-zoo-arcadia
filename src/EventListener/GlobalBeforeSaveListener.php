@@ -58,10 +58,7 @@ class GlobalBeforeSaveListener implements EventSubscriber
                 // Assigne l'utilisateur connecté à l'entité
                 $entity->setUser($connectedUser);
 
-               /* // Si l'entité User a une méthode pour ajouter l'entité, l'utilise
-                if ($connectedUser && method_exists($connectedUser, 'addEntity')) {
-                    $connectedUser->addEntity($entity);
-                }*/
+
             }
         }
 

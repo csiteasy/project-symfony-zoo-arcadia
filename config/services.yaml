@@ -6,7 +6,8 @@
 parameters:
     images_directory: '%kernel.project_dir%/public/images'
     mailer.sender_email_admin: no-reply@zoo-arcadia.com
-
+    email_from: '%env(EMAIL_FROM)%'
+    email_to: '%env(EMAIL_TO)%'
 
     KT_THEME: 'metronic'
 
@@ -56,6 +57,8 @@ parameters:
           "plugins/custom/datatables/datatables.bundle.js"
         ]
       }
+    env(MONGODB_URL): ''
+    env(MONGODB_DB): ''
 
 services:
 
